@@ -1,6 +1,6 @@
 # Korabli Mod Land
 
-Open source Korabli Mod Station
+Open source Mod station for Korabli
 
 ## Development State
 
