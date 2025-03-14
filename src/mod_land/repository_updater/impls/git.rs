@@ -32,7 +32,7 @@ impl Git {
         .unwrap_or(url.to_string().as_str()),
       path,
     )
-    .map_err(|err| error::InitRepo::Git2RepositoryClone {
+    .map_err(|err| error::InitRepo::Clone {
       source: Arc::new(err),
     })?;
 
@@ -40,28 +40,23 @@ impl Git {
   }
 
   async fn update_repo(&self, path: &Path) -> Result<(), error::UpdateRepo> {
-    let repo =
-      git2::Repository::open(path).map_err(|err| error::UpdateRepo::Git2RepositoryOpen {
+    let repo = git2::Repository::open(path).map_err(|err| error::UpdateRepo::Open {
+      source: Arc::new(err),
+    })?;
+
+    let mut remote = repo
+      .find_remote("origin")
+      .map_err(|err| error::UpdateRepo::FindRemote {
         source: Arc::new(err),
       })?;
 
-    let mut remote =
-      repo
-        .find_remote("origin")
-        .map_err(|err| error::UpdateRepo::Git2RepositoryFindRemote {
-          source: Arc::new(err),
-        })?;
-
-    let fetch_commit = do_fetch(&repo, &["master"], &mut remote).map_err(|err| {
-      error::UpdateRepo::Git2RepositoryFetch {
+    let fetch_commit =
+      do_fetch(&repo, &["master"], &mut remote).map_err(|err| error::UpdateRepo::Fetch {
         source: Arc::new(err),
-      }
-    })?;
+      })?;
 
-    do_merge(&repo, "master", fetch_commit).map_err(|err| {
-      error::UpdateRepo::Git2RepositoryMerge {
-        source: Arc::new(err),
-      }
+    do_merge(&repo, "master", fetch_commit).map_err(|err| error::UpdateRepo::Merge {
+      source: Arc::new(err),
     })?;
 
     Ok(())

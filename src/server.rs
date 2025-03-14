@@ -24,6 +24,7 @@ pub struct Server {
   host: IpAddr,
   port: u16,
   api_mount: String,
+  swagger_ui: bool,
   swagger_ui_mount: String,
   api_docs_mount: String,
   config_dir: PathBuf,
@@ -38,6 +39,7 @@ impl Default for Server {
       swagger_ui_mount: "/swagger-ui".to_string(),
       api_docs_mount: "/api-docs".to_string(),
       config_dir: PathBuf::from(".korabli-mod-land/config"),
+      swagger_ui: true,
     }
   }
 }
@@ -86,21 +88,24 @@ impl Server {
       .map_err(|err| error::Serve::ReadModLandConfig { source: err })?;
 
     let (router, api) = self.api_router().split_for_parts();
-    let router = Router::new()
-      .merge(router)
-      .merge(
+    let router = Router::new().merge(router);
+    let router = if self.swagger_ui {
+      router.merge(
         SwaggerUi::new(self.swagger_ui_mount.to_owned())
           .url(format!("{}/openapi.json", self.api_docs_mount), api.clone()),
       )
-      .layer(Extension(ModLandInstance(Arc::new(Mutex::new(
-        ModLand::try_from_config(mod_land_config)
-          .map_err(|err| error::Serve::ModLandTryFromConfig { source: err })?,
-      )))))
-      .layer(SecureClientIpSource::RightmostXForwardedFor.into_extension())
-      .layer(Extension(AllowedIp(vec![
-        IpAddr::V4([127, 0, 0, 1].into()),
-        IpAddr::V6("::1".parse().expect("not ipv6")),
-      ])));
+    } else {
+      router
+    }
+    .layer(Extension(ModLandInstance(Arc::new(Mutex::new(
+      ModLand::try_from_config(mod_land_config)
+        .map_err(|err| error::Serve::ModLandTryFromConfig { source: err })?,
+    )))))
+    .layer(SecureClientIpSource::RightmostXForwardedFor.into_extension())
+    .layer(Extension(AllowedIp(vec![
+      IpAddr::V4([127, 0, 0, 1].into()),
+      IpAddr::V6("::1".parse().expect("not ipv6")),
+    ])));
 
     let listener = tokio::net::TcpListener::bind((self.host, self.port))
       .await

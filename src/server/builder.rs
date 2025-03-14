@@ -1,4 +1,4 @@
-use std::{net::IpAddr, path::PathBuf};
+use std::net::IpAddr;
 
 use super::Server;
 
@@ -13,7 +13,7 @@ impl Builder {
     }
   }
 
-  pub fn done(self) -> Server {
+  pub fn build(self) -> Server {
     self.server
   }
 
@@ -54,6 +54,14 @@ impl Builder {
     Mount: Into<String>,
   {
     self.server.api_docs_mount = mount.into();
+    self
+  }
+
+  pub fn swagger_ui<Flag>(&mut self, flag: Flag) -> &mut Self
+  where
+    Flag: Into<bool>,
+  {
+    self.server.swagger_ui = flag.into();
     self
   }
 }

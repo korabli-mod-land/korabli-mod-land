@@ -20,23 +20,30 @@ async fn main() {
   let cli = cli::Cli::parse();
 
   match cli.command {
-    cli::Commands::Serve { host, port } => {
+    cli::Commands::Serve {
+      host,
+      port,
+      swagger_ui,
+      api_mount,
+      api_docs_mount,
+      swagger_ui_mount,
+    } => {
       let mut server = server::Server::builder();
 
-      if let Some(host) = host {
-        server.host(IpAddr::V4(host.parse().expect("host incorrect")));
-      }
+      server
+        .host(IpAddr::V4(host.parse().expect("host incorrect")))
+        .port(port)
+        .api_mount(api_mount)
+        .api_docs_mount(api_docs_mount)
+        .swagger_ui(swagger_ui)
+        .swagger_ui_mount(swagger_ui_mount);
 
-      if let Some(port) = port {
-        server.port(port);
-      }
-
-      let mut server = server.done();
+      let mut server = server.build();
 
       server.serve().await.expect("server failed")
     }
     cli::Commands::Generate { item, output } => {
-      let server = server::Server::builder().done();
+      let server = server::Server::builder().build();
       fs::write(
         output,
         match item.as_str() {
