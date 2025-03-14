@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ModInfo",
+  "type": "object",
+  "required": [
+    "authors",
+    "description",
+    "id",
+    "name",
+    "versions"
+  ],
+  "properties": {
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dependencies": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "description": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "default": "game",
+      "allOf": [
+        {
+          "$ref": "#/definitions/ModType"
+        }
+      ]
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/VersionInfo"
+      }
+    }
+  },
+  "definitions": {
+    "ModType": {
+      "type": "string",
+      "enum": [
+        "game",
+        "meta"
+      ]
+    },
+    "VersionInfo": {
+      "type": "object",
+      "required": [
+        "sha512sum",
+        "url"
+      ],
+      "properties": {
+        "sha512sum": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

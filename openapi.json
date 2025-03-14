@@ -1,0 +1,239 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Korabli Mod Land",
+    "description": "Korabli Mod Land",
+    "license": {
+      "name": ""
+    },
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/hello": {
+      "get": {
+        "tags": [
+          "utils"
+        ],
+        "operationId": "v1_hello",
+        "responses": {
+          "200": {
+            "description": "Hello"
+          }
+        }
+      }
+    },
+    "/api/v1/mod/info/{id}": {
+      "get": {
+        "tags": [
+          "mod"
+        ],
+        "operationId": "v1_info",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Mod ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mod info got",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Mod not found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/v1/search": {
+      "get": {
+        "tags": [
+          "search"
+        ],
+        "operationId": "v1_search",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Mod ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search completed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error."
+          }
+        }
+      }
+    },
+    "/api/v1/update/{repo}": {
+      "post": {
+        "tags": [
+          "lifetime cycle"
+        ],
+        "operationId": "v1_update",
+        "parameters": [
+          {
+            "name": "repo",
+            "in": "path",
+            "description": "Repository to update.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Update success"
+          },
+          "400": {
+            "description": "Unknown repository"
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ModInfo": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "versions",
+          "authors"
+        ],
+        "properties": {
+          "authors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dependencies": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ModType"
+          },
+          "versions": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/VersionInfo"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ModType": {
+        "type": "string",
+        "enum": [
+          "game",
+          "meta"
+        ]
+      },
+      "SearchRes": {
+        "type": "object",
+        "required": [
+          "matches"
+        ],
+        "properties": {
+          "matches": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "VersionInfo": {
+        "type": "object",
+        "required": [
+          "url",
+          "sha512sum"
+        ],
+        "properties": {
+          "sha512sum": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
